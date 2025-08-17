@@ -17,8 +17,7 @@
     "test": "vitest run && playwright test",
     "test:unit": "vitest",
     "test:e2e": "playwright test",
-    "format": "prettier --write .",
-    "prepare": "husky install"
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.10.0",
