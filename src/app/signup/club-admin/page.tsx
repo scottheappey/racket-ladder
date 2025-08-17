@@ -1,3 +1,5 @@
+'use client'
+
 import { ClubAdminSignupForm } from '@/components/signup/ClubAdminSignupForm'
 
 export default function ClubAdminSignupPage() {

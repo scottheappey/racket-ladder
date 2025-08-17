@@ -1,3 +1,5 @@
+'use client'
+
 import { PlayerSignupForm } from '@/components/signup/PlayerSignupForm'
 
 export default function PlayerSignupPage() {
