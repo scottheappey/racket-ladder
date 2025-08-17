@@ -23,16 +23,12 @@ export const authOptions = {
       return session;
     },
   },
-  pages: {
-    signIn: "/auth/signin",
-  },
 };
 
-export const {
-  handlers,
-  auth,
-  signIn,
-  signOut,
-} = NextAuth(authOptions);
+const handler = NextAuth(authOptions);
 
-export const { GET, POST } = handlers;
+export const GET = handler;
+export const POST = handler;
+
+// Export auth function for use in other parts of the app
+export { getServerSession as auth } from "next-auth";
