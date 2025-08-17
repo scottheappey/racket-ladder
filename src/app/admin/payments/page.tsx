@@ -3,6 +3,8 @@ import { auth } from '@/lib/auth-temp';
 import { prisma } from '@/lib/prisma';
 import PaymentsList from '@/components/admin/PaymentsList';
 
+export const dynamic = 'force-dynamic';
+
 export default async function PaymentsPage() {
   const session = await auth();
   if (!session?.user) {

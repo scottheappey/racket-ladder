@@ -4,6 +4,8 @@ import { prisma } from '@/lib/prisma';
 import MatchList from '@/components/admin/MatchList';
 import CreateMatchForm from '@/components/admin/CreateMatchForm';
 
+export const dynamic = 'force-dynamic';
+
 export default async function MatchesPage() {
   const session = await auth();
   if (!session?.user) {

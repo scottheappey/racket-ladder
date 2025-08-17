@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
 interface Season {
@@ -22,7 +22,7 @@ export function CSVImportForm() {
   const [showPreview, setShowPreview] = useState(false)
 
   // Load seasons on component mount
-  useState(() => {
+  useEffect(() => {
     const loadSeasons = async () => {
       try {
         const response = await fetch('/api/admin/seasons')
@@ -35,7 +35,7 @@ export function CSVImportForm() {
       }
     }
     loadSeasons()
-  })
+  }, [])
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0]

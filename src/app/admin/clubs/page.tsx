@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { db } from '@/lib/db'
 import { ClubsTable } from '@/components/admin/ClubsTable'
 
+export const dynamic = 'force-dynamic';
+
 interface Club {
   id: string
   name: string

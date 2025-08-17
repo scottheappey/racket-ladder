@@ -3,6 +3,8 @@ import Link from 'next/link'
 import { db } from '@/lib/db'
 import { SeasonsTable } from '@/components/admin/SeasonsTable'
 
+export const dynamic = 'force-dynamic';
+
 async function getSeasons() {
   try {
     const seasons = await db.season.findMany({

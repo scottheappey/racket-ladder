@@ -1,6 +1,8 @@
 import { Suspense } from 'react'
 import { CSVImportForm } from '@/components/admin/CSVImportForm'
 
+export const dynamic = 'force-dynamic';
+
 export default function ImportPlayersPage() {
   return (
     <div className="space-y-6">

@@ -2,6 +2,8 @@ import { db } from '@/lib/db'
 import { DashboardStats } from '@/components/admin/DashboardStats'
 import { RecentActivity } from '@/components/admin/RecentActivity'
 
+export const dynamic = 'force-dynamic';
+
 async function getStats() {
   try {
     const [clubCount, playerCount, seasonCount, matchCount] = await Promise.all([

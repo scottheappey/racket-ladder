@@ -3,6 +3,8 @@ import Link from 'next/link'
 import { db } from '@/lib/db'
 import { PlayersTable } from '@/components/admin/PlayersTable'
 
+export const dynamic = 'force-dynamic';
+
 async function getPlayers() {
   try {
     const players = await db.player.findMany({
