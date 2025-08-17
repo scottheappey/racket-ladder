@@ -1,102 +1,178 @@
-import Image from "next/image";
+import Link from "next/link";
+import { db } from "@/lib/db";
 
-export default function Home() {
+type Club = {
+  id: string;
+  name: string;
+  slug: string;
+  country: string;
+  _count: {
+    seasons: number;
+    players: number;
+  };
+};
+
+export default async function HomePage() {
+  // Get some featured clubs for the homepage (handle gracefully if DB unavailable)
+  let clubs: Club[] = [];
+  try {
+    clubs = await db.club.findMany({
+      take: 6,
+      include: {
+        _count: {
+          select: {
+            seasons: true,
+            players: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  } catch {
+    console.log("Database not available, showing empty clubs list");
+  }
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm">
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">🎾</span>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Racket Ladders
+              </h1>
+            </div>
+            <nav className="flex items-center gap-6">
+              <Link href="/about" className="text-gray-600 hover:text-gray-900">
+                About
+              </Link>
+              <Link
+                href="/contact"
+                className="text-gray-600 hover:text-gray-900"
+              >
+                Contact
+              </Link>
+              <Link
+                href="/login"
+                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+              >
+                Sign In
+              </Link>
+            </nav>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+      </header>
+
+      {/* Hero Section */}
+      <section className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+        <div className="container mx-auto px-4 py-16 text-center">
+          <h1 className="text-4xl md:text-6xl font-bold mb-6">
+            Modern Ladder Competitions
+          </h1>
+          <p className="text-xl md:text-2xl mb-8 text-blue-100">
+            The 1% better platform for racket sports leagues with WhatsApp
+            flows, magic join links, and delightful public pages
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              href="/clubs"
+              className="bg-white text-blue-600 px-8 py-3 rounded-md font-semibold hover:bg-gray-100 transition-colors"
+            >
+              Find Clubs
+            </Link>
+            <Link
+              href="/admin"
+              className="border-2 border-white text-white px-8 py-3 rounded-md font-semibold hover:bg-white hover:text-blue-600 transition-colors"
+            >
+              Club Admin
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+            Why Choose Racket Ladders?
+          </h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="text-center">
+              <div className="text-4xl mb-4">📱</div>
+              <h3 className="text-xl font-semibold mb-2">
+                WhatsApp Integration
+              </h3>
+              <p className="text-gray-600">
+                Match notifications and updates delivered via WhatsApp for
+                seamless communication
+              </p>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl mb-4">🔗</div>
+              <h3 className="text-xl font-semibold mb-2">Magic Join Links</h3>
+              <p className="text-gray-600">
+                Share a simple link for instant player registration and league
+                joining
+              </p>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl mb-4">📊</div>
+              <h3 className="text-xl font-semibold mb-2">
+                Beautiful Public Pages
+              </h3>
+              <p className="text-gray-600">
+                SEO-optimized pages with social sharing that showcase your
+                league professionally
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Clubs */}
+      {clubs.length > 0 && (
+        <section className="py-16 bg-white">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+              Featured Clubs
+            </h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {clubs.map((club) => (
+                <Link
+                  key={club.id}
+                  href={`/clubs/${club.slug}`}
+                  className="block bg-gray-50 rounded-lg p-6 hover:shadow-md transition-shadow"
+                >
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    {club.name}
+                  </h3>
+                  <p className="text-gray-600 mb-4">{club.country}</p>
+                  <div className="flex justify-between text-sm text-gray-500">
+                    <span>{club._count.seasons} seasons</span>
+                    <span>{club._count.players} players</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-8">
+        <div className="container mx-auto px-4 text-center">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <span className="text-xl">🎾</span>
+            <span className="font-bold">Racket Ladders</span>
+          </div>
+          <p className="text-gray-400">
+            The modern platform for racket sports competitions
+          </p>
+        </div>
       </footer>
     </div>
   );

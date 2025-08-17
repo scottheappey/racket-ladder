@@ -1,0 +1,276 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  PLAYER
+}
+
+enum Sport {
+  TENNIS
+  PICKLEBALL
+  PADEL
+  SQUASH
+}
+
+enum SeasonType {
+  LADDER
+  BOX
+}
+
+enum MatchStatus {
+  PENDING
+  PLAYED
+  WALKOVER
+  CANCELLED
+}
+
+enum PaymentStatus {
+  REQUIRES_PAYMENT
+  SUCCEEDED
+  FAILED
+}
+
+enum Algorithm {
+  ELO
+  NONE
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String?
+  email     String   @unique
+  role      Role     @default(PLAYER)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  clubAdmins ClubAdmin[]
+  players    Player[]
+
+  @@map("users")
+}
+
+model Club {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  country   String
+  logoUrl   String?  @map("logo_url")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  clubAdmins   ClubAdmin[]
+  players      Player[]
+  seasons      Season[]
+  magicInvites MagicInvite[]
+
+  @@map("clubs")
+}
+
+model ClubAdmin {
+  id     String @id @default(cuid())
+  clubId String @map("club_id")
+  userId String @map("user_id")
+
+  // Relations
+  club Club @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([clubId, userId])
+  @@map("club_admins")
+}
+
+model Player {
+  id        String   @id @default(cuid())
+  clubId    String   @map("club_id")
+  userId    String?  @map("user_id")
+  name      String
+  email     String
+  phone     String?
+  rating    Float?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  club         Club          @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  user         User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  boxPlayers   BoxPlayer[]
+  ladderPlayers LadderPlayer[]
+  matchesA     Match[]       @relation("PlayerA")
+  matchesB     Match[]       @relation("PlayerB")
+  resultsWon   Result[]      @relation("ResultWinner")
+  resultsReported Result[]   @relation("ResultReporter")
+  payments     Payment[]
+
+  @@unique([clubId, email])
+  @@map("players")
+}
+
+model Season {
+  id             String     @id @default(cuid())
+  clubId         String     @map("club_id")
+  name           String
+  sport          Sport
+  type           SeasonType
+  startDate      DateTime   @map("start_date")
+  endDate        DateTime   @map("end_date")
+  isActive       Boolean    @default(true) @map("is_active")
+  entryFeeCents  Int?       @map("entry_fee_cents")
+  createdAt      DateTime   @default(now()) @map("created_at")
+
+  // Relations
+  club           Club           @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  boxes          Box[]
+  ladder         Ladder?
+  matches        Match[]
+  promotionRules PromotionRule[]
+  payments       Payment[]
+  magicInvites   MagicInvite[]
+
+  @@map("seasons")
+}
+
+model Box {
+  id       String @id @default(cuid())
+  seasonId String @map("season_id")
+  name     String
+  order    Int
+
+  // Relations
+  season     Season      @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  boxPlayers BoxPlayer[]
+  matches    Match[]
+
+  @@unique([seasonId, order])
+  @@map("boxes")
+}
+
+model BoxPlayer {
+  id       String @id @default(cuid())
+  boxId    String @map("box_id")
+  playerId String @map("player_id")
+  seed     Int
+
+  // Relations
+  box    Box    @relation(fields: [boxId], references: [id], onDelete: Cascade)
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([boxId, playerId])
+  @@unique([boxId, seed])
+  @@map("box_players")
+}
+
+model Ladder {
+  id        String    @id @default(cuid())
+  seasonId  String    @unique @map("season_id")
+  algorithm Algorithm @default(ELO)
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  season        Season         @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  ladderPlayers LadderPlayer[]
+  matches       Match[]
+
+  @@map("ladders")
+}
+
+model LadderPlayer {
+  id       String @id @default(cuid())
+  ladderId String @map("ladder_id")
+  playerId String @map("player_id")
+  rating   Float  @default(1200.0)
+
+  // Relations
+  ladder Ladder @relation(fields: [ladderId], references: [id], onDelete: Cascade)
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([ladderId, playerId])
+  @@map("ladder_players")
+}
+
+model Match {
+  id          String      @id @default(cuid())
+  seasonId    String      @map("season_id")
+  ladderId    String?     @map("ladder_id")
+  boxId       String?     @map("box_id")
+  playerAId   String      @map("player_a_id")
+  playerBId   String      @map("player_b_id")
+  scheduledAt DateTime?   @map("scheduled_at")
+  status      MatchStatus @default(PENDING)
+  createdAt   DateTime    @default(now()) @map("created_at")
+
+  // Relations
+  season  Season  @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  ladder  Ladder? @relation(fields: [ladderId], references: [id], onDelete: Cascade)
+  box     Box?    @relation(fields: [boxId], references: [id], onDelete: Cascade)
+  playerA Player  @relation("PlayerA", fields: [playerAId], references: [id], onDelete: Cascade)
+  playerB Player  @relation("PlayerB", fields: [playerBId], references: [id], onDelete: Cascade)
+  result  Result?
+
+  @@map("matches")
+}
+
+model Result {
+  id               String   @id @default(cuid())
+  matchId          String   @unique @map("match_id")
+  winnerId         String   @map("winner_id")
+  setsJson         String   @map("sets_json") // JSON array of set scores
+  reportedByPlayerId String @map("reported_by_player_id")
+  reportedAt       DateTime @default(now()) @map("reported_at")
+
+  // Relations
+  match          Match  @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  winner         Player @relation("ResultWinner", fields: [winnerId], references: [id], onDelete: Cascade)
+  reportedByPlayer Player @relation("ResultReporter", fields: [reportedByPlayerId], references: [id], onDelete: Cascade)
+
+  @@map("results")
+}
+
+model PromotionRule {
+  id        String @id @default(cuid())
+  seasonId  String @map("season_id")
+  upCount   Int    @map("up_count")
+  downCount Int    @map("down_count")
+
+  // Relations
+  season Season @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+
+  @@unique([seasonId])
+  @@map("promotion_rules")
+}
+
+model Payment {
+  id                     String        @id @default(cuid())
+  seasonId               String        @map("season_id")
+  playerId               String        @map("player_id")
+  amountCents            Int           @map("amount_cents")
+  stripePaymentIntentId  String?       @map("stripe_payment_intent_id")
+  status                 PaymentStatus @default(REQUIRES_PAYMENT)
+  createdAt              DateTime      @default(now()) @map("created_at")
+
+  // Relations
+  season Season @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([seasonId, playerId])
+  @@map("payments")
+}
+
+model MagicInvite {
+  id        String   @id @default(cuid())
+  clubId    String   @map("club_id")
+  seasonId  String   @map("season_id")
+  token     String   @unique
+  expiresAt DateTime @map("expires_at")
+
+  // Relations
+  club   Club   @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  season Season @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+
+  @@map("magic_invites")
+}
