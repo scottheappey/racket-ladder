@@ -96,11 +96,6 @@ export async function POST(request: NextRequest) {
         slug,
         country,
         logoUrl,
-        ...(session.user.role === 'CLUB_ADMIN' && {
-          clubAdmins: {
-            connect: { id: session.user.id }
-          }
-        })
       },
       include: {
         _count: {
@@ -111,6 +106,16 @@ export async function POST(request: NextRequest) {
         }
       }
     })
+
+    // If user is CLUB_ADMIN, create the ClubAdmin relationship
+    if (session.user.role === 'CLUB_ADMIN') {
+      await db.clubAdmin.create({
+        data: {
+          userId: session.user.id,
+          clubId: club.id
+        }
+      })
+    }
 
     return NextResponse.json(club, { status: 201 })
   } catch (error) {

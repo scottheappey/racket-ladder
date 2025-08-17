@@ -57,6 +57,12 @@ export default async function HomePage() {
                 Contact
               </Link>
               <Link
+                href="/signup/club-admin"
+                className="text-gray-600 hover:text-gray-900"
+              >
+                Start a Club
+              </Link>
+              <Link
                 href="/login"
                 className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
               >
@@ -85,10 +91,16 @@ export default async function HomePage() {
               Find Clubs
             </Link>
             <Link
+              href="/signup/club-admin"
+              className="bg-green-600 text-white px-8 py-3 rounded-md font-semibold hover:bg-green-700 transition-colors"
+            >
+              Start Your Club
+            </Link>
+            <Link
               href="/admin"
               className="border-2 border-white text-white px-8 py-3 rounded-md font-semibold hover:bg-white hover:text-blue-600 transition-colors"
             >
-              Club Admin
+              Admin Login
             </Link>
           </div>
         </div>
